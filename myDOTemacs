@@ -1,0 +1,129 @@
+;; aquamacs prefs here ~/Library/Preferences/Aquamacs Emacs/Preferences.el
+
+;; here's some more suggestions from stackoverflow
+;; http://stackoverflow.com/questions/60367/the-single-most-useful-emacs-feature
+
+;; to byte compile everything
+;; C-u 0 M-x byte-recompile-directory
+
+;; cool thing: M-x re-builder/
+
+;; add new modes to ~/Applications/Emacs.app/Contents/Resources/lisp
+(setq load-path
+        (append (list nil "/Applications/Emacs.app/Contents/Resources/lisp/themes/emacs-color-theme-solarized"
+		      "/Applications/Emacs.app/Contents/Resources/lisp/scala-mode"
+		      "~/.emacs.d/plugins"
+		      "~/.emacs.d/plugins/yasnippet-v"
+		      "~/.emacs.d/plugins/ensime/elisp"
+		      "~/.emacs.d/plugins/tabbar"
+		      "/Applications/Emacs.app/Contents/Resources/lisp") load-path))
+
+;; yasnippet
+(require 'yasnippet) ;; not yasnippet-bundle
+(yas/initialize)
+(yas/load-directory "~/.emacs.d/plugins/yasnippet-v/snippets")
+
+;; js2 mode make sure it is byte compiled
+(setq js2-bounce-indent-p t)
+(autoload 'js2-mode "js2" nil t)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+
+;; scss
+(autoload 'scss-mode "scss-mode")
+(add-to-list 'auto-mode-alist '("\\.scss\\'" . scss-mode))
+(setq scss-compile-at-save nil)
+
+(require 'color-theme)
+;; see each color theme
+;; http://gnuemacscolorthemetest.googlecode.com/svn/html/index-el.html
+;;(require 'color-theme-calm-forest)
+
+;; Adding solarized
+(require 'color-theme-solarized)
+(color-theme-solarized-dark)
+;;(color-theme-gnome2)
+;; good high vis
+;;(color-theme-jsc-dark)
+;;(set-background-color "black")
+;; #1E2E2E
+
+
+
+
+;; font
+(set-default-font "Bitstream Vera Sans Mono-10")
+
+;; custom keys
+;; Allow hash to be entered, due to UK keyboard
+(defun insert-pound ()
+(insert "#"))
+(global-set-key (kbd "M-3") '(lambda()(interactive)(insert-pound)))
+;; allow bullet character to be inputted
+(defun insert-bullet ()
+(insert "•"))
+(global-set-key (kbd "M-8") '(lambda()(interactive)(insert-bullet)))
+
+;;scala-mode, see the scala mode readme for info
+(require 'scala-mode-auto)
+
+;; Load the ensime lisp code...
+;; Open .scala file. M-x ensime (once per project) really doesn't work as hoped
+;;(require 'ensime)
+;;(add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
+
+
+;; yasnippet with scala
+(setq yas/my-directory "/Applications/Emacs.app/Contents/Resources/lisp/scala-mode/contrib/yasnippet/snippets")
+(yas/load-directory yas/my-directory)
+
+(add-hook 'scala-mode-hook
+	  '(lambda ()
+	     (yas/minor-mode-on)
+	     ))
+
+;; make double search be replace-string                                                                                                       
+(defadvice replace-string (around turn-off-case-fold-search)
+  (let ((case-fold-search nil))
+    ad-do-it))
+
+(ad-activate 'replace-string)
+(global-set-key (kbd "M-s") 'replace-string)
+
+;; grep                                                                                                                                       
+(global-set-key (kbd "C-z") 'find-grep-dired)
+;; other probably useful keybindings                                                                                                          
+;; http://stackoverflow.com/questions/3124844/what-are-your-favorite-global-key-bindings-in-emacs  
+
+;; recent files
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+;; window height
+(if (window-system)
+  (set-frame-height (selected-frame) 60))
+
+;;tabbar
+ (require 'tabbar)
+ (tabbar-mode)
+ (setq tabbar-buffer-groups-function
+           (lambda ()
+             (list "All Buffers")))
+ (setq tabbar-buffer-list-function
+     	(lambda ()
+     	  (remove-if
+     	   (lambda(buffer)
+     	     (find (aref (buffer-name buffer) 0) " *"))
+     	   (buffer-list))))
+
+;; tab forward and back
+(global-set-key (kbd "s-}") 'tabbar-forward-group)
+(global-set-key (kbd "s-{") 'tabbar-backward-group)
+
+;; vertical bar
+(setq default-cursor-type 'bar)
+
+;; line numbers
+(require 'linum)
+(global-linum-mode)
